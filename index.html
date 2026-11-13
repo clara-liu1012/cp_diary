@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登出國軍 Online · 我們的24天拍立得膠囊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Noto+Serif+TC:wght@500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-paper: #f5efe6;
+    --bg-card: #fffdf9;
+    --ink-dark: #3e352f;
+    --ink-muted: #7a6b60;
+    --accent-rose: #d97b73;
+    --accent-gold: #c99a45;
+    --accent-sage: #6b8e78;
+    --shadow-polaroid: 0 10px 24px -6px rgba(62, 53, 47, 0.16), 0 2px 6px rgba(62, 53, 47, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg-paper);
+    background-image: radial-gradient(rgba(122, 107, 96, 0.14) 1px, transparent 0);
+    background-size: 20px 20px;
+    color: var(--ink-dark);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    line-height: 1.65;
+    padding-bottom: 80px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 28px 18px; }
+  
+  /* 頂部標題與復古票券倒數板 */
+  header { text-align: center; margin-bottom: 32px; }
+  .badge-top {
+    display: inline-block;
+    background: var(--ink-dark);
+    color: #fffdf9;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    padding: 4px 14px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(1.65rem, 4.5vw, 2.35rem);
+    color: var(--ink-dark);
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--ink-muted); font-size: 0.95rem; }
+
+  .ticket-board {
+    background: var(--bg-card);
+    border: 2px dashed #cbbba8;
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin: 24px auto 34px;
+    box-shadow: 0 8px 20px rgba(62,53,47,0.06);
+    position: relative;
+  }
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .cd-box {
+    background: #faf5ed;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    border: 1px solid #eadfce;
+  }
+  .cd-box.highlight { background: #fdf3f2; border-color: #f0cbc7; }
+  .cd-label { font-size: 0.82rem; color: var(--ink-muted); margin-bottom: 4px; }
+  .cd-num {
+    font-family: 'Caveat', cursive;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--accent-sage);
+  }
+  .cd-box.highlight .cd-num { color: var(--accent-rose); }
+  .cd-unit { font-size: 0.85rem; margin-left: 2px; font-family: 'Zen Maru Gothic', sans-serif; }
+
+  /* 進度條 */
+  .progress-wrap { margin-top: 8px; }
+  .progress-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 12px;
+    background: #ebe2d5;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-rose));
+    width: 0%;
+    transition: width 0.6s ease;
+    border-radius: 99px;
+  }
+
+  /* 拍立得照片牆 */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 32px 24px;
+    margin-top: 20px;
+  }
+  .polaroid {
+    background: var(--bg-card);
+    padding: 14px 14px 20px;
+    box-shadow: var(--shadow-polaroid);
+    border-radius: 4px;
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+  .polaroid:nth-child(odd) { transform: rotate(-1.3deg); }
+  .polaroid:nth-child(even) { transform: rotate(1.2deg); }
+  .polaroid:hover { transform: rotate(0deg) translateY(-5px); z-index: 5; }
+
+  /* 特別紀念日外框 */
+  .polaroid.birthday { border: 2px solid #e6c687; background: #fffcf5; }
+  .polaroid.leave { border: 2px solid #eab5b0; background: #fff9f8; }
+  .polaroid.discharge { border: 2px solid #a3c2ae; background: #f8fcf9; }
+
+  /* 紙膠帶裝飾 */
+  .tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    width: 96px;
+    height: 24px;
+    background: rgba(214, 193, 165, 0.65);
+    backdrop-filter: blur(1px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .polaroid.birthday .tape { background: rgba(230, 192, 115, 0.7); }
+  .polaroid.leave .tape { background: rgba(227, 146, 139, 0.65); }
+  .polaroid.discharge .tape { background: rgba(133, 173, 148, 0.65); }
+
+  .photo-frame {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #efe8dd;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .photo-placeholder {
+    text-align: center;
+    color: #9e8e80;
+    font-size: 0.85rem;
+    padding: 16px;
+  }
+  .photo-placeholder span { display: block; font-size: 2rem; margin-bottom: 4px; }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .date-tag {
+    font-family: 'Caveat', cursive;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-rose);
+  }
+  .mood-tag { font-size: 1.2rem; }
+  .card-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-text {
+    font-size: 0.88rem;
+    color: #574b43;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* 互動想念按鈕與許願區 */
+  .bottom-section {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .miss-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid #e6dacb;
+    box-shadow: 0 6px 16px rgba(62,53,47,0.05);
+  }
+  .btn-miss {
+    background: var(--accent-rose);
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 99px;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(217, 123, 115, 0.35);
+    transition: transform 0.15s;
+    margin-top: 10px;
+  }
+  .btn-miss:active { transform: scale(0.95); }
+  .miss-quote {
+    margin-top: 12px;
+    font-size: 0.92rem;
+    color: var(--accent-rose);
+    min-height: 24px;
+    font-weight: 500;
+  }
+
+  /* 彈出閱讀視窗 */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 35, 30, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 100;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-card {
+    background: var(--bg-card);
+    max-width: 440px;
+    width: 100%;
+    border-radius: 8px;
+    padding: 18px 18px 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+
+  /* 飄浮愛心 */
+  .floating-heart {
+    position: fixed;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: floatUp 1.4s ease-out forwards;
+    z-index: 999;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(0.8); }
+    100% { opacity: 0; transform: translateY(-130px) scale(1.3); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge-top">2026.11.12 — 12.05 · 24 DAYS CAPSULE</div>
+    <h1>等你登出國軍 Online 的日子</h1>
+    <p class="subtitle">11/12 生日快樂！記錄你不在的每一天，等休假與退伍一起拆封 🎞️</p>
+  </header>
+
+  <section class="ticket-board">
+    <div class="countdown-grid">
+      <div class="cd-box highlight">
+        <div class="cd-label">距離 11/28 放假見面</div>
+        <div class="cd-num" id="cd-leave">--<span class="cd-unit">天</span></div>
+      </div>
+      <div class="cd-box">
+        <div class="cd-label">距離 12/05 正式結訓</div>
+        <div class="cd-num" id="cd-end">--<span class="cd-unit">天</span></div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-head">
+        <span>軍旅登出進度條</span>
+        <span id="progress-text">計算中...</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="gallery" id="gallery"></main>
+
+  <section class="bottom-section">
+    <div class="miss-card">
+      <h3>想念補給站 💌</h3>
+      <p style="font-size:0.88rem; color:var(--ink-muted); margin-top:4px;">在裡面覺得累或想我的時候，就按一下這個按鈕</p>
+      <button class="btn-miss" onclick="triggerMiss()">點我一下 · 我也很想你 ❤️</button>
+      <div class="miss-quote" id="miss-quote"></div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="modal" onclick="closeModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  // ▼▼▼ 每天只要修改或複製貼上這裡的區塊就可以更新日記與照片 ▼▼▼
+  const defaultEntries = [
+    {
+      id: "11-12",
+      date: "11/12",
+      dayLabel: "DAY 01 · 生日快樂",
+      title: "生日快樂＆送你入伍第一天",
+      mood: "🎂",
+      type: "birthday",
+      image: "1112.jpg",
+      content: "今天是你生日，也是你進去當兵的第一天！雖然不能一整天黏在一起慶生，但這24天我會每天拍一張照片記錄生活，等你出來慢慢看。生日快樂，在裡面要好好照顧自己！"
+    },
+    {
+      id: "11-13",
+      date: "11/13",
+      dayLabel: "DAY 02",
+      title: "沒有你在的第二天",
+      mood: "🧸",
+      type: "normal",
+      image: "1113.jpg",
+      content: "下班後覺得時間突然變得很安靜，吃飯的時候一直習慣性想轉頭跟你說話。今天也乖乖過完一天了，幫你倒數中！"
+    },
+    {
+      id: "11-28",
+      date: "11/28",
+      dayLabel: "DAY 17 · 休假見面！",
+      title: "終於等到你放假出來啦",
+      mood: "🥰",
+      type: "leave",
+      image: "1128.jpg",
+      content: "11/28–11/29 兩天休假！要把這半個月沒吃到的美食、沒說完的話全部補回來！"
+    },
+    {
+      id: "12-05",
+      date: "12/05",
+      dayLabel: "DAY 24 · 恭喜結訓",
+      title: "恭喜登出國軍 Online！",
+      mood: "🎉",
+      type: "discharge",
+      image: "1205.jpg",
+      content: "24天平安順利結束了！歡迎回到我身邊，接下來的每一天我們繼續一起去更多地方玩吧！"
+    }
+  ];
+  // ▲▲▲ 日記資料區塊結束 ▲▲▲
+
+  const quotes = [
+    "今天也有好好想你，再撐一下就見面了！",
+    "你在裡面辛苦了，我在外面有乖乖照顧自己喔～",
+    "每天睡前都會幫你劃掉一天，倒數很快的！",
+    "不管你在哪裡，我永遠都是你最強的後盾 ❤️",
+    "已經在想 11/28 見面要帶你去吃什麼好料了！"
+  ];
+
+  // 渲染拍立得卡片
+  const gallery = document.getElementById('gallery');
+  defaultEntries.forEach(item => {
+    const card = document.createElement('article');
+    card.className = `polaroid ${item.type || 'normal'}`;
+    card.innerHTML = `
+      <div class="tape"></div>
+      <div class="photo-frame">
+        <img src="${item.image}" alt="${item.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="photo-placeholder" style="display:none;">
+          <span>📷</span>
+          尚未上傳 ${item.image}<br><small>(傳好同名照片就會自動出現)</small>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="date-tag">${item.date} · ${item.dayLabel}</span>
+        <span class="mood-tag">${item.mood}</span>
+      </div>
+      <h2 class="card-title">${item.title}</h2>
+      <p class="card-text">${item.content}</p>
+    `;
+    card.onclick = () => openModal(item);
+    gallery.appendChild(card);
+  });
+
+  // 展開完整日記視窗
+  function openModal(item) {
+    const body = document.getElementById('modal-body');
+    body.innerHTML = `
+      <div class="photo-frame" style="margin-top:8px;">
+        <img src="${item.image}" alt="${item.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="photo-placeholder" style="display:none;"><span>📷</span>${item.date} 拍立得照片預留區</div>
+      </div>
+      <div class="meta-row" style="margin-top:12px;">
+        <span class="date-tag">${item.date} · ${item.dayLabel}</span>
+        <span class="mood-tag">${item.mood}</span>
+      </div>
+      <h2 class="card-title" style="font-size:1.25rem; margin:6px 0 10px;">${item.title}</h2>
+      <p style="font-size:0.96rem; color:#463b34; white-space:pre-line;">${item.content}</p>
+    `;
+    document.getElementById('modal').classList.add('open');
+  }
+  function closeModal(e) {
+    if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open');
+  }
+
+  // 自動依據真實日期計算倒數
+  function updateCountdown() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const start = new Date(2026, 10, 12); // 11/12
+    const leave = new Date(2026, 10, 28); // 11/28
+    const end = new Date(2026, 11, 5);    // 12/05
+
+    const diffLeave = Math.ceil((leave - today) / (1000 * 60 * 60 * 24));
+    const diffEnd = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+
+    document.getElementById('cd-leave').innerHTML = diffLeave > 0
+      ? `${diffLeave}<span class="cd-unit">天</span>`
+      : (diffLeave >= -1 ? `放假中<span class="cd-unit">!</span>` : `已結束`);
+
+    document.getElementById('cd-end').innerHTML = diffEnd > 0
+      ? `${diffEnd}<span class="cd-unit">天</span>`
+      : `已退伍<span class="cd-unit">🎉</span>`;
+
+    const totalDays = (end - start) / (1000 * 60 * 60 * 24);
+    const passedDays = Math.max(0, Math.min(totalDays, (today - start) / (1000 * 60 * 60 * 24)));
+    const pct = Math.round((passedDays / totalDays) * 100);
+    document.getElementById('progress-fill').style.width = `${pct}%`;
+    document.getElementById('progress-text').textContent = `已完成 ${pct}%`;
+  }
+  updateCountdown();
+
+  // 想念按鈕愛心特效
+  function triggerMiss() {
+    const q = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById('miss-quote').textContent = q;
+    for (let i = 0; i < 6; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.textContent = ['❤️', '🧸', '✨', '💌'][Math.floor(Math.random() * 4)];
+      heart.style.left = (20 + Math.random() * 60) + 'vw';
+      heart.style.top = '70vh';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 1400);
+    }
+  }
+</script>
+</body>
+</html>
